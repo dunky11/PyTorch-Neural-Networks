@@ -3,12 +3,12 @@ import torch.nn as nn
 
 
 class ResNet(nn.Module):
-    def __init__(self, output_dim):
+    def __init__(self, input_channels, output_dim, fc_dim):
         super().__init__()
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d((2, 2), stride=2)
         self.conv1_1 = nn.Conv2d(
-            1, 64, kernel_size=(7, 7), padding=3, bias=False)
+            input_channels, 64, kernel_size=(7, 7), padding=3, bias=False)
         self.batchnorm1_1 = nn.BatchNorm2d(64)
         self.conv2_1 = nn.Conv2d(
             64, 64, kernel_size=(3, 3), padding=1, bias=False)
@@ -117,7 +117,7 @@ class ResNet(nn.Module):
         self.batchnorm5_6 = nn.BatchNorm2d(512)
         self.averagepool = nn.AvgPool2d((2, 2), stride=2)
         self.flatten = nn.Flatten(1)
-        self.fc = nn.Linear(16384, output_dim)
+        self.fc = nn.Linear(fc_dim, output_dim)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
