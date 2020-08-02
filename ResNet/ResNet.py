@@ -2,13 +2,16 @@ import torch
 import torch.nn as nn
 
 
+# @param input_dim - Tuple represinting the input dimension of shape (channels, height, width)
+# @param output_dim - Integer representing the number of classes to predict
 class ResNet(nn.Module):
-    def __init__(self, input_channels, output_dim, fc_dim):
+    def __init__(self, input_dim: tuple, output_dim: int):
         super().__init__()
+        fc_dim = int((input_dim[1] * 0.5**5) * (input_dim[2] * 0.5 ** 5) * 512)
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d((2, 2), stride=2)
         self.conv1_1 = nn.Conv2d(
-            input_channels, 64, kernel_size=(7, 7), padding=3, bias=False)
+            input_dim[0], 64, kernel_size=(7, 7), padding=3, bias=False)
         self.batchnorm1_1 = nn.BatchNorm2d(64)
         self.conv2_1 = nn.Conv2d(
             64, 64, kernel_size=(3, 3), padding=1, bias=False)
