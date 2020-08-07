@@ -4,15 +4,15 @@ import torch.nn as nn
 
 # @param input_dim - Tuple represinting the input dimension of shape (channels, height, width)
 # @param output_dim - Integer representing the number of classes to predict
-class ResNet(nn.Module):
+class ResNet34(nn.Module):
     def __init__(self, input_shape: tuple, output_dim: int):
         super().__init__()
         fc_dim = int((input_shape[1] * 0.5**5) *
                      (input_shape[2] * 0.5 ** 5) * 512)
         self.relu = nn.ReLU()
-        self.maxpool = nn.MaxPool2d((2, 2), stride=2)
+        self.maxpool = nn.MaxPool2d((3, 3), stride=2)
         self.conv1_1 = nn.Conv2d(
-            input_shape[0], 64, kernel_size=(7, 7), padding=3, bias=False)
+            input_shape[0], 64, kernel_size=(7, 7), padding=3, stride=2, bias=False)
         self.batchnorm1_1 = nn.BatchNorm2d(64)
         self.conv2_1 = nn.Conv2d(
             64, 64, kernel_size=(3, 3), padding=1, bias=False)
@@ -36,7 +36,7 @@ class ResNet(nn.Module):
             64, 128, kernel_size=(1, 1), stride=2, bias=False)
         self.conv2_downsample_batchnorm = nn.BatchNorm2d(128)
         self.conv3_1 = nn.Conv2d(
-            64, 128, kernel_size=(3, 3), padding=1, bias=False)
+            64, 128, kernel_size=(3, 3), stride=2, padding=1, bias=False)
         self.batchnorm3_1 = nn.BatchNorm2d(128)
         self.conv3_2 = nn.Conv2d(
             128, 128, kernel_size=(3, 3), padding=1, bias=False)
@@ -63,7 +63,7 @@ class ResNet(nn.Module):
             128, 256, kernel_size=(1, 1), stride=2, bias=False)
         self.conv3_downsample_batchnorm = nn.BatchNorm2d(256)
         self.conv4_1 = nn.Conv2d(
-            128, 256, kernel_size=(3, 3), padding=1, bias=False)
+            128, 256, kernel_size=(3, 3), padding=1, stride=2, bias=False)
         self.batchnorm4_1 = nn.BatchNorm2d(256)
         self.conv4_2 = nn.Conv2d(
             256, 256, kernel_size=(3, 3), padding=1, bias=False)
@@ -102,7 +102,7 @@ class ResNet(nn.Module):
             256, 512, kernel_size=(1, 1), stride=2, bias=False)
         self.conv4_downsample_batchnorm = nn.BatchNorm2d(512)
         self.conv5_1 = nn.Conv2d(
-            256, 512, kernel_size=(3, 3), padding=1, bias=False)
+            256, 512, kernel_size=(3, 3), padding=1, stride=2, bias=False)
         self.batchnorm5_1 = nn.BatchNorm2d(512)
         self.conv5_2 = nn.Conv2d(
             512, 512, kernel_size=(3, 3), padding=1, bias=False)
@@ -119,7 +119,7 @@ class ResNet(nn.Module):
         self.conv5_6 = nn.Conv2d(
             512, 512, kernel_size=(3, 3), padding=1, bias=False)
         self.batchnorm5_6 = nn.BatchNorm2d(512)
-        self.averagepool = nn.AvgPool2d((2, 2), stride=2)
+        self.averagepool = nn.AvgPool2d((3, 3), padding=1, stride=1)
         self.flatten = nn.Flatten(1)
         self.fc = nn.Linear(fc_dim, output_dim)
         self.softmax = nn.Softmax(dim=1)
@@ -138,7 +138,6 @@ class ResNet(nn.Module):
         x = self.relu(self.batchnorm2_6(self.conv2_6(x) + res))
         res = self.relu(self.conv2_downsample_batchnorm(
             self.conv2_downsample(x)))
-        x = self.maxpool(x)
         x = self.relu(self.batchnorm3_1(self.conv3_1(x)))
         x = self.relu(self.batchnorm3_2(self.conv3_2(x) + res))
         res = x
@@ -152,7 +151,6 @@ class ResNet(nn.Module):
         x = self.relu(self.batchnorm3_8(self.conv3_8(x) + res))
         res = self.relu(self.conv3_downsample_batchnorm(
             self.conv3_downsample(x)))
-        x = self.maxpool(x)
         x = self.relu(self.batchnorm4_1(self.conv4_1(x)))
         x = self.relu(self.batchnorm4_2(self.conv4_2(x) + res))
         res = x
@@ -172,7 +170,6 @@ class ResNet(nn.Module):
         x = self.relu(self.batchnorm4_12(self.conv4_12(x) + res))
         res = self.relu(self.conv4_downsample_batchnorm(
             self.conv4_downsample(x)))
-        x = self.maxpool(x)
         x = self.relu(self.batchnorm5_1(self.conv5_1(x)))
         x = self.relu(self.batchnorm5_2(self.conv5_2(x) + res))
         res = x
