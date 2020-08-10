@@ -2,15 +2,16 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# @param input_dim - Tuple represinting the input dimension of shape (channels, height, width)
-# @param output_dim - Integer representing the number of classes to predict
+# @param input_channels - Number of channels in the input image,
+# input image must be in shape (channels, width, height)
+# @param num_classes - Number of classes to predict
 
 
 class ResNet18(nn.Module):
-    def __init__(self, input_dim, output_dim):
+    def __init__(self, input_channels, num_classes):
         super().__init__()
         self.conv1_1 = nn.Conv2d(
-            input_dim[0], 64, kernel_size=7, padding=3, stride=2, bias=False)
+            input_channels, 64, kernel_size=7, padding=3, stride=2, bias=False)
         self.bn1_1 = nn.BatchNorm2d(64)
 
         self.conv2_1 = nn.Conv2d(64, 64, kernel_size=3, padding=1, bias=False)
@@ -72,9 +73,7 @@ class ResNet18(nn.Module):
         self.conv5_4 = nn.Conv2d(
             512, 512, kernel_size=3, padding=1, bias=False)
         self.bn5_4 = nn.BatchNorm2d(512)
-
-        fc_dim = int(input_dim[1] * 0.5 ** 5) * 512
-        self.fc = nn.Linear(fc_dim, output_dim)
+        self.fc = nn.Linear(512, num_classes)
 
     def forward(self, x):
         x = F.relu(self.bn1_1(self.conv1_1(x)))
@@ -108,8 +107,8 @@ class ResNet18(nn.Module):
         x = F.relu(self.bn5_3(self.conv5_3(x)))
         x = F.relu(self.bn5_4(self.conv5_4(x) + res))
 
-        x = F.avg_pool2d(x, kernel_size=3, stride=1, padding=1)
-        x = x.view(x.shape[0], -1)
+        x = F.adaptive_avg_pool2d(x, (1, 1))
+        x = x.view(-1, 512)
 
         x = self.fc(x)
         x = F.softmax(x, dim=1)
